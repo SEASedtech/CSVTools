@@ -1,0 +1,106 @@
+#!/usr/bin/python
+
+import traceback
+import csv as csvOperator
+import collections
+
+# Import arguments
+import sys
+arguments = sys.argv[1:]
+
+# Read files
+fileContents = []
+for i in range(len(arguments)):
+  try:
+    filename = arguments[i]
+    with open(filename) as file:
+      csvfile = csvOperator.reader(file, delimiter=',')
+      
+      csv = {}
+      csv['data'] = []
+      csv['headers'] = None
+      for row in csvfile:
+        if (csv['headers'] == None):
+          csv['headers'] = row
+        else:
+          csv['data'].append(row)
+      fileContents.append(csv)
+  except:
+    print "I couldn't read the file: " + arguments[i] + "\nError: ", sys.exc_info()[0]
+    traceback.print_exc(file=sys.stdout)
+    sys.exit(0)
+
+# Define writer
+def write(header, data):
+  print "\nEnter a filename to write to:"
+  filename = raw_input()
+  # Add extension if necessary
+  if not filename.endswith('.csv'):
+    filename += '.csv'
+  with open(filename, 'w') as csvfile:
+    writer = csvOperator.writer(csvfile, delimiter=',', quotechar='|', quoting=csvOperator.QUOTE_MINIMAL)
+    # Write header
+    writer.writerow(header)
+    # Data
+    for row in data:
+      writer.writerow(row)
+    print "\nData written to " + filename
+
+
+
+if len(fileContents) != 1:
+  print "We can only operate on one file at a time. Please re-run with one CSV file"
+  sys.exit(0)
+
+headers = fileContents[0]['headers']
+data = fileContents[0]['data']
+
+choice = None
+while choice == None:
+  print "Choose an option:"
+  print "1 - Determine duplicates by comparing full rows."
+  print "2 - Determine duplicates by comparing only one key column (choose column next)."
+  text = raw_input()
+  if (text == "1"):
+    choice = True
+  elif (text == "2"):
+    choice = False
+  else:
+    print "Invalid choice. Try again...\n"
+
+if choice:
+  # Comparing full rows
+  usedRows = {}
+  newRows = []
+  for row in data:
+    if str(row) in usedRows:
+      continue
+    else:
+      newRows.append(row)
+      usedRows[str(row)] = True
+  write(headers, newRows)
+else:
+  # Comparing by one column
+  colID = len(headers) + 5
+  while colID >= len(headers) or colID < 0:
+    print "\nEnter the key column number. Only the first row with each key will be kept."
+    for j in range(len(headers)):
+      print str(j + 1) + ' - ' + headers[j]
+    colID = int(raw_input()) - 1
+
+    if colID >= len(headers) or colID < 0:
+      print "Invalid number. Try again..."
+
+  usedKeys = {}
+  newData = []
+  for row in data:
+    key = row[colID]
+    if key in usedKeys:
+      # Ignore
+      continue
+    else:
+      # Add to list of used keys
+      usedKeys[key] = True
+      newData.append(row)
+
+  write(headers, newData)
