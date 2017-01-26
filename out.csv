@@ -1,10 +1,4 @@
-ID,name,index
-2,two,1
-5,five,3
-7,seven,5
-6,six,6
-9,nine,7
-8,eight,8
-4,four,10
-1,one,11
-3,three,12
+Rubric Name,Avg Points,Num Graded,Num to Grade,Total Students,Percent Graded
+Style,0.0,0,39,39,0.0
+Correctness,42.717948717948715,39,0,39,100.0
+Efficiency,0.0,0,39,39,0.0
